@@ -21,41 +21,43 @@ The system consists of the following main components:
 
 ## Project Structure
 
-The project is organized into the following directories:
+```
 WordBuddy/
 │
-├── src/ # Source code for the robot and interactions
-│ ├── main.py # Main entry point, handles game flow
-│ ├── vision.py # Letter recognition via OpenCV and OCR
-│ ├── robot_control.py # Robot control logic (pick & place, gestures)
-│ ├── game_logic.py # Logic for word selection, verification
-│ ├── tts_module.py # Text-to-speech module for feedback
-│ └── utils.py # Utility functions for logging, configurations
+├── src/                     # Source code for the robot and interactions
+│   ├── main.py              # Main entry point, handles game flow
+│   ├── vision.py            # Letter recognition via OpenCV and OCR
+│   ├── robot_control.py     # Robot control logic (pick & place, gestures)
+│   ├── game_logic.py        # Logic for word selection, verification
+│   ├── tts_module.py        # Text-to-speech module for feedback
+│   └── utils.py             # Utility functions for logging, configurations
 │
-├── data/ # Data assets for the project
-│ ├── words.json # List of words for the game
-│ ├── config.yaml # Configuration file for system settings
-│ ├── calibration/ # Calibration data for camera (ArUco markers)
-│ └── test_logs/ # Logs from tests (success, errors, times)
+├── data/                    # Data assets for the project
+│   ├── words.json           # List of words for the game
+│   ├── config.yaml          # Configuration file for system settings
+│   ├── calibration/         # Calibration data for camera (ArUco markers)
+│   └── test_logs/           # Logs from tests (success, errors, times)
 │
-├── hardware/ # Physical setup and hardware-related files
-│ ├── blocks/ # Photos of letter blocks
-│ ├── markers/ # ArUco markers for table calibration
-│ └── camera/ # Camera setup and configuration images
+├── hardware/                # Physical setup and hardware-related files
+│   ├── blocks/              # Photos of letter blocks
+│   ├── markers/             # ArUco markers for table calibration
+│   └── camera/              # Camera setup and configuration images
 │
-├── docs/ # Documentation related to the project
-│ ├── requirements.md # Functional and non-functional requirements
-│ ├── design.md # Architecture and system design
-│ ├── benchmarking.md # Benchmarking and comparison with similar projects
-│ ├── evaluation_plan.md # Plan for testing and evaluation
-│ └── presentation.md # Initial presentation materials
+├── docs/                    # Documentation related to the project
+│   ├── requirements.md      # Functional and non-functional requirements
+│   ├── design.md            # Architecture and system design
+│   ├── benchmarking.md      # Benchmarking and comparison with similar projects
+│   ├── evaluation_plan.md   # Plan for testing and evaluation
+│   └── presentation.md      # Initial presentation materials
 │
-├── reports/ # Reports and presentations
-│ ├── initial_report.md # Draft of the project report
-│ ├── final_report.md # Final report after the project completion
-│ └── slides/ # Presentation slides
+├── reports/                 # Reports and presentations
+│   ├── initial_report.md    # Draft of the project report
+│   ├── final_report.md      # Final report after the project completion
+│   └── slides/              # Presentation slides
 │
-└── README.md # This file
+└── README.md                # This file
+```
+```
 
 
 ## How to Run
