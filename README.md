@@ -1,113 +1,84 @@
-# WordBuddy - Interactive Educational Robot
+# WordBuddy – Interactive Educational Robot
 
-WordBuddy is an interactive robot designed to help children and learners improve their word recognition and spelling skills through a hands-on game. The robot uses a combination of **vision** for letter recognition, **robot motion** for feedback and word formation, and **Text-to-Speech (TTS)** for auditory interaction. The main objective of this project is to create an engaging and educational experience that integrates robotics and AI technologies.
+**WordBuddy** is an interactive robot that helps learners practice word recognition and spelling with physical letter blocks.  
+It combines **computer vision** for letter detection, **robot motion** (UR3/UR3e) for setting up the task, and **Text-to-Speech (TTS)** for guidance and feedback.
 
-## Project Overview
+This repository contains the Python code, data, and documentation to run a minimal yet well-structured MVP: a basic pick-and-place to lay out partial words, user completion on the table, vision verification, and voice feedback.
 
-The system consists of the following main components:
-- **Robot Control**: A UR3/UR3e robot is used to pick and place blocks in the correct order, forming words and interacting with users.
-- **Computer Vision**: Using OpenCV and OCR (Tesseract), the robot detects and recognizes letters from physical blocks on the table.
-- **Text-to-Speech (TTS)**: The robot provides auditory feedback to guide users, using Python libraries like pyttsx3.
-- **Human-Robot Interaction (HRI)**: The robot engages users with simple gestures and vocal encouragement, creating an interactive and motivating learning environment.
+> **Status:** MVP in progress – structured code, initial motion & assets ready; vision and evaluation plan under active development.
 
-## Technologies Used
+---
 
-- **UR3/UR3e Robot**: For the physical manipulation of blocks and movement.
-- **Python**: Main language for all programming and robot control.
-- **OpenCV**: For camera capture and image processing, including letter detection and OCR.
-- **Tesseract OCR**: For optical character recognition (OCR) to read letters from blocks.
-- **pyttsx3 / gTTS**: For Text-to-Speech conversion, providing vocal feedback.
-- **ArUco markers**: For camera calibration and table positioning.
+## Key Design (Current Setup)
+
+- **Robot Motion:** Programs recorded on the **UR3/UR3e** using **pedal + free-drive** to save waypoints.  
+  Python communicates with the robot via **TCP/IP** using URScript or `urx` for moves and gripper control.
+- **Computer Vision:** Overhead camera + **OpenCV** (+ **Tesseract OCR**) for letter recognition.  
+  **ArUco markers** define the table frame and scale.
+- **Interaction:** **TTS** guides the session; simple success or encouragement phrases.
+- **Architecture:** Pure **Python**, no ROS. Modules communicate through function calls, managed by `main.py`.
+
+---
 
 ## Project Structure
 
 ```
 WordBuddy/
 │
-├── src/                     # Source code for the robot and interactions
-│   ├── main.py              # Main entry point, handles game flow
-│   ├── vision.py            # Letter recognition via OpenCV and OCR
-│   ├── robot_control.py     # Robot control logic (pick & place, gestures)
-│   ├── game_logic.py        # Logic for word selection, verification
-│   ├── tts_module.py        # Text-to-speech module for feedback
-│   └── utils.py             # Utility functions for logging, configurations
+├── src/                        
+│   ├── main.py                 
+│   ├── vision.py               # Letter recognition (OCR + calibration)
+│   ├── robot_control.py        # Robot control (movements, pick & place)
+│   ├── game_logic.py           # Game logic (word management, completion verification)
+│   ├── tts_module.py           # Text-to-speech synthesis (TTS feedback)
+│   └── utils.py                # Utility functions (logging, configurations)
 │
-├── data/                    # Data assets for the project
-│   ├── words.json           # List of words for the game
-│   ├── config.yaml          # Configuration file for system settings
-│   ├── calibration/         # Calibration data for camera (ArUco markers)
-│   └── test_logs/           # Logs from tests (success, errors, times)
+├── data/                       
+│   ├── words.json              # Predefined words for the game
+│   ├── config.yaml             # General configurations (table dimensions, safety)
+│   ├── calibration/            # Camera calibration data (ArUco files)
+│   └── test_logs/              # Test execution logs (successes, errors, timings)
 │
-├── hardware/                # Physical setup and hardware-related files
-│   ├── blocks/              # Photos of letter blocks
-│   ├── markers/             # ArUco markers for table calibration
-│   └── camera/              # Camera setup and configuration images
+├── hardware/                    # Physical project materials
+│   ├── blocks/                 # Photos of letter blocks (high readability)
+│   ├── markers/                # ArUco markers for table calibration
+│   └── camera/                 # Fixed camera photos and configuration
 │
-├── docs/                    # Documentation related to the project
-│   ├── requirements.md      # Functional and non-functional requirements
-│   ├── design.md            # Architecture and system design
-│   ├── benchmarking.md      # Benchmarking and comparison with similar projects
-│   ├── evaluation_plan.md   # Plan for testing and evaluation
-│   └── presentation.md      # Initial presentation materials
+├── docs/                        # Documentation
+│   ├── requirements.md         # Functional and non-functional requirements
+│   ├── design.md               # System architecture description
+│   ├── benchmarking.md         # Benchmarking results with other solutions
+│   ├── evaluation_plan.md      # Testing plan and evaluation methods
+│   └── presentation.md         # Presentation draft
 │
-├── reports/                 # Reports and presentations
-│   ├── initial_report.md    # Draft of the project report
-│   ├── final_report.md      # Final report after the project completion
-│   └── slides/              # Presentation slides
+├── reports/                    
+│   ├── initial_report.md     
+│   └── final_report.md         
 │
-└── README.md                # This file
-```
+└── README.md                    
 ```
 
+---
 
-## How to Run
+## Technologies
 
-### Prerequisites
-- Python 3.x
-- Required libraries:
-  - `opencv-python`
-  - `pyttsx3` or `gTTS`
-  - `tesseract`
-  - `urx` (for UR3 robot control)
+- **UR3/UR3e** – Robotic arm (pick & place, free-drive, pedal)
+- **Python 3.10+**
+- **OpenCV** – Image processing and marker detection
+- **Tesseract OCR** – Optical character recognition for letter blocks
+- **pyttsx3 / gTTS** – Text-to-Speech for voice feedback
+- **`urx` / RTDE** – TCP/IP communication with the UR3 robot
+- **VS Code** – Development environment
 
-Install the necessary dependencies:
+---
 
+## Quick Start
+
+### 1️ Install dependencies
+
+```bash
+python -m venv .venv
+source .venv/bin/activate         # (Windows: .venv\Scripts\activate)
 pip install -r requirements.txt
 
-
-### Running the Game
-1. Ensure the robot is connected and ready.
-2. Set up the camera with ArUco markers for calibration.
-3. Run the main program:
-
-python src/main.py
-
-4. The robot will prompt you with a word, and you will interact by placing the correct letters to complete the word.
-
-## Contributing
-
-Feel free to contribute to the project by opening issues or submitting pull requests. Contributions can include:
-- Bug fixes
-- Enhancements in robot control or vision
-- Improvements in user interaction and feedback
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## Acknowledgements
-
-- **UR3e Robot** for their incredible robotic arm capabilities.
-- **OpenCV** and **Tesseract** for vision and OCR.
-- **pyttsx3** for seamless Text-to-Speech capabilities.
-
----
-
-## Contact
-
-For any inquiries or to contribute to the project, feel free to reach out to:
-- Email: (mailto:your.email@example.com)
-- GitHub: (https://github.com/yourusername)
-
+(Make sure Tesseract OCR is installed on your system)
