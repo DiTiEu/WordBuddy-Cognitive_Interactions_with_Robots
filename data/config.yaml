@@ -12,3 +12,4 @@ grid:
 vision:
   aruco_size_mm: 40
   ocr_threshold: 150
+difficulty: "normal"
