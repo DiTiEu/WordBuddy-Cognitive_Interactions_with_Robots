@@ -15,7 +15,7 @@ vision:
 difficulty: "normal"
 poses:
   letter_sources:
-    A: [0.10, -1.50, 1.80, 0.00, 1.60, 0.00]
+    A: [-0.1216, -2.4925, -0.4095, -1.9348, 1.5364, 6.1450]
     B: [0.20, -1.50, 1.80, 0.00, 1.60, 0.00]
     C: [0.30, -1.50, 1.80, 0.00, 1.60, 0.00]
     # ... aggiungi le altre lettere che ti servono

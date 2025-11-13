@@ -73,8 +73,10 @@ def main():
     robot_letters, user_letters = split_letters(word, difficulty)
 
     # Il robot posiziona le lettere nei primi slot
-    for slot_index, letter in enumerate(robot_letters):
-        robot.place_letter_in_slot(letter, slot_index)
+    # for slot_index, letter in enumerate(robot_letters):
+    #     robot.place_letter_in_slot(letter, slot_index)
+    robot.move_joints(config["poses"]["letter_sources"]["A"])
+
     print("✅ Lettere iniziali posizionate con successo.")
 
     say("Ora tocca a te! Aggiungi le lettere mancanti per completare la parola.")
