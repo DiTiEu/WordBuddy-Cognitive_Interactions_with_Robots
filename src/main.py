@@ -69,19 +69,12 @@ def main():
 
     say(f"La parola è {word}")
 
-    # --- 4. Simulazione posizionamento lettere ---
-    grid = {
-        "0": (0.1, 0.1),
-        "1": (0.2, 0.1),
-        "2": (0.3, 0.1),
-        "3": (0.4, 0.1),
-        "4": (0.5, 0.1),
-        "5": (0.6, 0.1),
-    }
+    # --- 4. Posizionamento lettere ---
     robot_letters, user_letters = split_letters(word, difficulty)
-    for i, letter in enumerate(robot_letters):
-        if str(i) in grid:
-            robot.place_letter(letter, grid[str(i)])
+
+    # Il robot posiziona le lettere nei primi slot
+    for slot_index, letter in enumerate(robot_letters):
+        robot.place_letter_in_slot(letter, slot_index)
     print("✅ Lettere iniziali posizionate con successo.")
 
     say("Ora tocca a te! Aggiungi le lettere mancanti per completare la parola.")

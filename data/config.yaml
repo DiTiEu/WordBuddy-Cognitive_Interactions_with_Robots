@@ -13,3 +13,17 @@ vision:
   aruco_size_mm: 40
   ocr_threshold: 150
 difficulty: "normal"
+poses:
+  letter_sources:
+    A: [0.10, -1.50, 1.80, 0.00, 1.60, 0.00]
+    B: [0.20, -1.50, 1.80, 0.00, 1.60, 0.00]
+    C: [0.30, -1.50, 1.80, 0.00, 1.60, 0.00]
+    # ... aggiungi le altre lettere che ti servono
+
+  slots:
+    "0": [0.40, -1.40, 1.90, 0.00, 1.60, 0.00]
+    "1": [0.50, -1.40, 1.90, 0.00, 1.60, 0.00]
+    "2": [0.60, -1.40, 1.90, 0.00, 1.60, 0.00]
+    # ... fino al massimo numero di lettere della parola
+
+  home: [0.0, -1.57, 1.57, 0.0, 1.57, 0.0]
