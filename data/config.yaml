@@ -1,6 +1,6 @@
 # da fare
 
-robot_ip: "192.168.1.10"
+robot_ip: "10.10.73.236"
 camera_id: 0
 safety:
   max_speed: 0.2

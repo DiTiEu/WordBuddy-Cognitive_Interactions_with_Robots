@@ -53,7 +53,12 @@ def main():
     print("\nSetup completato ✅")
 
     # --- 1. Inizializzazione robot ---
-    robot = Robot(config.get("robot_ip"))
+    # Inizializzo il robot
+    robot = Robot(
+        robot_ip=config.get("robot_ip"),
+        poses=config.get("poses", {}),
+        safety=config.get("safety", {})
+    )
 
     # --- 2. Impostazione difficoltà ---
     difficulty = input("Scegli la difficoltà (easy / normal / hard): ").strip().lower()
