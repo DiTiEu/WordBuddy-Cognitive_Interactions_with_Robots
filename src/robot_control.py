@@ -142,10 +142,21 @@ class Robot:
 
     def grip(self, state: bool):
         """
-        Placeholder: qui poi aggiungerai il comando reale per il gripper (IO digitale, URCap ecc.).
-        Per ora solo print.
+        Controllo reale del gripper OnRobot (RG2 / RG6).
+        Usa i comandi URScript forniti dall'URCap OnRobot.
         """
-        print("(SIM) Gripper", "CHIUSO" if state else "APERTO")
+
+        if self._simulated:
+            print("(SIM) Gripper", "CHIUSO" if state else "APERTO")
+            return
+
+        if state:
+            print("🤏 Chiusura gripper OnRobot")
+            self._send_urscript("rg_close()")
+        else:
+            print("🖐️ Apertura gripper OnRobot")
+            self._send_urscript("rg_open()")
+
 
     def place_letter_in_slot(self, letter: str, slot_index: int):
         """

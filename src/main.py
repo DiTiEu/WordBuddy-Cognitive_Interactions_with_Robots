@@ -86,5 +86,7 @@ def main():
 
     say("Ora tocca a te! Aggiungi le lettere mancanti per completare la parola.")
 
+    robot.close()
+
 if __name__ == "__main__":
     main()

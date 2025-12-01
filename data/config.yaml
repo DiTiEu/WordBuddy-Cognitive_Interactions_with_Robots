@@ -1,10 +1,13 @@
 # da fare
 
-robot_ip: "10.10.73.236"
+robot_ip: "10.10.73.239"
 camera_id: 0
 safety:
   max_speed: 0.2
   safe_height: 0.25
+  z_pick_offset: -0.01 
+gripper:
+  open_width_mm: 45     # apertura massima desiderata (mm)
 grid:
   cell_size_mm: 50
   rows: 2
