@@ -1,10 +1,38 @@
-from robot_control import Robot
 from utils import load_config
+from robot_control import Robot
+import time
+import os
 
-config = load_config("data/config.yaml")
-robot = Robot(config["robot_ip"], config["poses"], config["safety"])
+if __name__ == "__main__":
+    # Carica config
+    config = load_config("data/config.yaml")
 
-robot.grip(False)   # apri
-robot.grip(True)    # chiudi
+    # Inizializza robot
+    robot = Robot(
+        robot_ip=config.get("robot_ip"),
+        poses=config.get("poses", {}),
+        safety=config.get("safety", {})
+    )
 
-robot.close()
+    # (opzionale) vai in home se definita
+    if "home" in config.get("poses", {}):
+        print("➡️ Vado in pose 'home'")
+        robot.move_joints(config["poses"]["home"])
+        time.sleep(1.0)
+
+    print(">>> TEST GRIPPER: APRI → CHIUDI <<<")
+
+    # APRI
+    robot.grip(False)
+    time.sleep(2.0)
+
+    # CHIUDI
+    robot.grip(True)
+    time.sleep(2.0)
+
+    # di nuovo APRI
+    robot.grip(False)
+    time.sleep(2.0)
+
+    robot.close()
+    print("✅ Test gripper terminato.")

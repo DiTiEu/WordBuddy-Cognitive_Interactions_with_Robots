@@ -3,6 +3,7 @@
 import time
 import socket
 from typing import List
+import os
 
 
 class Robot:
@@ -76,6 +77,24 @@ class Robot:
         except OSError as e:
             print(f"⚠️ Errore nell'invio di URScript: {e}")
 
+    def _send_script_file(self, filepath: str):
+        """
+        Invia un file URScript completo al robot (come facevi nel codice vecchio).
+        Il file viene letto in binario e mandato via socket così com'è.
+        """
+        if self._simulated or self.sock is None:
+            print(f"(SIM) Invierei il file URScript: {filepath}")
+            return
+
+        try:
+            with open(filepath, "rb") as f:
+                data = f.read()
+            print(f"📄 Invio script UR: {filepath} ({len(data)} bytes)")
+            self.sock.sendall(data)
+        except OSError as e:
+            print(f"⚠️ Errore nel leggere o inviare {filepath}: {e}")
+
+
     # ---------- MOVIMENTO DI BASE ----------
 
     def move_joints(self, joints: List[float]):
@@ -142,20 +161,28 @@ class Robot:
 
     def grip(self, state: bool):
         """
-        Controllo reale del gripper OnRobot (RG2 / RG6).
-        Usa i comandi URScript forniti dall'URCap OnRobot.
+        Comando reale per l'RG2/6 via URScript:
+        - state == False → APRI (usa script 'open')
+        - state == True  → CHIUDI (usa script 'close')
+        Gli script UR sono quelli generati da Polyscope (OnRobot URCap).
         """
+        # Path relativi alla root del progetto
+        # Adatta se hai scelto nomi/cartelle diverse.
+        base_dir = "scripts"
+        open_script = "pinza_open.script"   # ex pinza40UR3.py
+        close_script = "pinza_close.script" # ex pinza10UR3.py
 
-        if self._simulated:
-            print("(SIM) Gripper", "CHIUSO" if state else "APERTO")
-            return
-
-        if state:
-            print("🤏 Chiusura gripper OnRobot")
-            self._send_urscript("rg_close()")
+        if not state:
+            print("🟢 Comando: APRI gripper")
+            filepath = os.path.join(base_dir, open_script)
         else:
-            print("🖐️ Apertura gripper OnRobot")
-            self._send_urscript("rg_open()")
+            print("🔴 Comando: CHIUDI gripper")
+            filepath = os.path.join(base_dir, close_script)
+
+        self._send_script_file(filepath)
+        # piccolo wait per dare tempo al controller di eseguire
+        time.sleep(1.0)
+
 
 
     def place_letter_in_slot(self, letter: str, slot_index: int):
