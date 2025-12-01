@@ -142,20 +142,24 @@ class Robot:
 
     def grip(self, state: bool):
         """
-        Controllo reale del gripper OnRobot (RG2 / RG6).
-        Usa i comandi URScript forniti dall'URCap OnRobot.
+        Controllo RG2 tramite funzione URScript RG2(...)
+        definita dall'URCap OnRobot.
         """
-
         if self._simulated:
             print("(SIM) Gripper", "CHIUSO" if state else "APERTO")
             return
-
+    
         if state:
-            print("🤏 Chiusura gripper OnRobot")
-            self._send_urscript("rg_close()")
+            # CHIUDI con forza bassa (5 N) verso width=0
+            print("🤏 Chiusura gripper RG2 (soft)")
+            cmd = "RG2(0, 5, 0.0, False, False, False)"
         else:
-            print("🖐️ Apertura gripper OnRobot")
-            self._send_urscript("rg_open()")
+            # APRI a 60 mm con forza bassa (5 N)
+            print("🖐️ Apertura gripper RG2 (soft)")
+            cmd = "RG2(60, 5, 0.0, False, False, False)"
+    
+        self._send_urscript(cmd)
+
 
 
     def place_letter_in_slot(self, letter: str, slot_index: int):
