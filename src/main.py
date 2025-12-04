@@ -1,16 +1,20 @@
 import os
-import pyttsx3
+# import pyttsx3
 from utils import load_config, load_words, ensure_folders
 from game_logic import select_word
 from robot_control import Robot
 from game_logic import split_letters
 
+"""
+
 def say(text):
-    """Sintesi vocale semplice con pyttsx3."""
+    Sintesi vocale semplice con pyttsx3.
     engine = pyttsx3.init()
     engine.setProperty("rate", 180)  # velocità di parlato
     engine.say(text)
     engine.runAndWait()
+
+"""
 
 def difficulty_feedback(level: str):
     """Messaggio vocale e testuale in base alla difficoltà scelta."""
@@ -23,7 +27,7 @@ def difficulty_feedback(level: str):
         message = "Hai scelto la modalità normale! Lavoreremo insieme a metà."
     
     print(f"🎙️ {message}")
-    say(message)
+    # say(message)
 
 def main():
     print("WordBuddy - Avvio del sistema...")
@@ -33,10 +37,12 @@ def main():
     config = load_config(config_path)
     print("Configurazione caricata con successo:")
     print(config)
+    
     # Carichiamo la lista di parole
     words_path = os.path.join("data", "words.json")
     words = load_words(words_path)
     print(f"{len(words)} parole caricate.")
+    
     # Caricamento dati di calibrazione
     calib_dir = os.path.join("data", "calibration")
     if os.path.exists(calib_dir):
@@ -66,25 +72,35 @@ def main():
         print("Difficoltà non valida, imposto 'normal' di default.")
         difficulty = "normal"
     config["difficulty"] = difficulty
+    difficulty_feedback(difficulty) # Aggiunto feedback vocale qui
 
     # --- 3. Selezione parola ---
     word = select_word(words)
     if not word:
         raise RuntimeError("Errore: nessuna parola è stata selezionata.")
 
-    say(f"La parola è {word}")
+    # say(f"La parola è {word}")
 
     # --- 4. Posizionamento lettere ---
     robot_letters, user_letters = split_letters(word, difficulty)
 
-    # Il robot posiziona le lettere nei primi slot
+    # ------------------------------------------------------------------
+    # DEMO PICK & PLACE: LETTERA A -> SLOT 0
+    # ------------------------------------------------------------------
+    print("\n🚀 AVVIO DEMO: Spostamento lettera 'A' nello Slot '0'...")
+    
+    # Questa funzione esegue la sequenza: 
+    # Vai su A -> Apri -> Scendi -> Chiudi -> Sali -> Vai su 0 -> Scendi -> Apri -> Sali
+    robot.place_letter_in_slot("A", 0)
+
+    # Nota: Il ciclo del gioco reale è commentato qui sotto per riferimento futuro
     # for slot_index, letter in enumerate(robot_letters):
     #     robot.place_letter_in_slot(letter, slot_index)
-    robot.move_joints(config["poses"]["letter_sources"]["A"])
 
-    print("✅ Lettere iniziali posizionate con successo.")
+    print("✅ Demo Pick & Place completata.")
+    # ------------------------------------------------------------------
 
-    say("Ora tocca a te! Aggiungi le lettere mancanti per completare la parola.")
+    # say("Demo completata. Ora tocca a te!")
 
     robot.close()
 

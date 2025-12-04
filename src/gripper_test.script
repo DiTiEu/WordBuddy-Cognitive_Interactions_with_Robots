@@ -1,22 +1,10 @@
-def pinza40UR3():
+def gripper_test():
+  popup("SCRIPT DA PC", title="gripper_test", warning=False)
   global _hidden_verificationVariable=0
-  step_count_2e4ded3d_39b1_4dbb_98a5_a2de29ceb273 = 0.0
-  thread Step_Counter_Thread_eaaf0193_d123_4b07_8fc9_a27efcf95439():
-    while (True):
-      step_count_2e4ded3d_39b1_4dbb_98a5_a2de29ceb273 = step_count_2e4ded3d_39b1_4dbb_98a5_a2de29ceb273 + 1.0
-      sync()
-    end
-  end
-  run Step_Counter_Thread_eaaf0193_d123_4b07_8fc9_a27efcf95439()
-  set_tool_communication(True, 1000000, 2, 1, 1.5, 3.5)
-  set_tool_output_mode(0)
-  set_tool_digital_output_mode(0, 1)
-  set_tool_digital_output_mode(1, 1)
-  set_tool_voltage(24)
-  set_gravity([0.0, 0.0, 9.82])
+  motion_version_set(1)
+  set_tcp(p[0.0,0.0,0.2286,0.0,3.141592653589793,0.0])
   set_safety_mode_transition_hardness(1)
-  set_target_payload(0.780000, [0.000000, 0.000000, 0.064000], [0.001017, 0.001017, 0.001017, 0.000000, 0.000000, 0.000000])
-  set_tcp(p[0.0,0.0,0.2286,0.0,0.0,0.0])
+  set_gravity([0.0, 0.0, 9.82])
   set_standard_analog_input_domain(0, 1)
   set_standard_analog_input_domain(1, 1)
   set_tool_analog_input_domain(0, 1)
@@ -24,10 +12,25 @@ def pinza40UR3():
   set_analog_outputdomain(0, 0)
   set_analog_outputdomain(1, 0)
   set_input_actions_to_default()
-  global Punto_1=p[0.0,0.0,0.0,0.0,0.0,0.0]
+  set_target_payload(0.780000, [0.000000, 0.000000, 0.064000], [0.001017, 0.001017, 0.001017, 0.000000, 0.000000, 0.000000])
+  set_tool_communication(True, 1000000, 2, 1, 1.5, 3.5)
+  set_tool_output_mode(0)
+  set_tool_digital_output_mode(0, 1)
+  set_tool_digital_output_mode(1, 1)
+  set_tool_voltage(24)
+  tool_wrench_limit_disable()
+  global Pared_der=p[0.0,0.2,0.0,-1.5707963267948963,-9.618353468608948E-17,-9.61835346860895E-17]
+  global Pared_detras=p[-0.2,0.0,0.0,-2.2214414541780205,9.141614254453102E-18,2.221441454178023]
+  global Plano_logo=p[0.3806594729527676,-0.19247443721635238,0.09617096608120673,-1.2973868854006991E-4,5.9117550127634585E-5,1.5708842035350803]
   # begin: URCap Installation Node
-  #   Source: OnRobot, 5.17.1, OnRobot A/S
+  #   Source: UR Connect, 2.3.3, Universal Robots
+  #   Type: UR Connect
+  myurRPC = rpc_factory("xmlrpc","http://127.0.0.1:40474")
+  # end: URCap Installation Node
+  # begin: URCap Installation Node
+  #   Source: OnRobot, 6.5.0, OnRobot A/S
   #   Type: Configuración de OnRobot
+  sleep(1.0)
   if (False):
     global rg_Busy = 0
     global rg_Depth = 0
@@ -36,17 +39,17 @@ def pinza40UR3():
     global rg_Width = 0
   end
   ON_CONN_SHIFT_BOOL = 64
-  ON_CONN_SHIFT_INT = 24
-  ON_CONN_SHIFT_FLOAT = 24
+  ON_CONN_SHIFT_INT = 27
+  ON_CONN_SHIFT_FLOAT = 32
   ON_CONN_REG_SUM_BOOL = 7
   ON_CONN_REG_SUM_INT = 4
   ON_CONN_REG_SUM_FLOAT = 3
   ON_TOOL_SHIFT_BOOL = 64
-  ON_TOOL_SHIFT_INT = 25
-  ON_TOOL_SHIFT_FLOAT = 24
+  ON_TOOL_SHIFT_INT = 28
+  ON_TOOL_SHIFT_FLOAT = 32
   ON_TOOL_SHIFT_BOOL_ARR = [64, 71, 71]
-  ON_TOOL_SHIFT_INT_ARR = [25, 28, 28]
-  ON_TOOL_SHIFT_FLOAT_ARR = [24, 27, 27]
+  ON_TOOL_SHIFT_INT_ARR = [28, 31, 31]
+  ON_TOOL_SHIFT_FLOAT_ARR = [32, 35, 35]
   ON_TOOL_REG_SUM_BOOL = 7
   ON_TOOL_REG_SUM_INT = 3
   ON_TOOL_REG_SUM_FLOAT = 3
@@ -74,6 +77,7 @@ def pinza40UR3():
   on_gripper = [False, False, False]
   on_custom_tcp_id = "none"
   on_custom_tcp_enabled = False
+  speedlTime = 0.002
   on_ft = False
   rg_index = 0
   on_gripper[rg_index] = True
@@ -88,6 +92,7 @@ def pinza40UR3():
   ON_FALSE3D=[False,False,False]
   ON_FALSE6D=[False,False,False,False,False,False]
   ON_FALSE8D=[False,False,False,False,False,False,False,False]
+  ON_DEFAULT_TRANSITION_TIME=0.15
   global on_return=0
   on_speedL=ON_ZERO6D
   on_speedBase=ON_ZERO6D
@@ -100,11 +105,12 @@ def pinza40UR3():
   on_dataProcess_thrd=0
   ON_DEVICE_ID_MISSING=0
   ON_INIT_WATCHDOG_HZ=5
-  ON_INIT_TIMEOUT=500
+  ON_INIT_TIMEOUT=2000
   on_robot_TCP_offset=ON_ZEROFRAME
   on_tcp_offset_actual=ON_ZEROFRAME
   on_cog_actual=ON_ZEROFRAME
   on_mass_actual=0.0
+  on_transition_time=ON_DEFAULT_TRANSITION_TIME
   on_robot_mount=[0.0,0.0]
   
   #======    End of OnRobot Globals    ======#
@@ -192,7 +198,7 @@ def pinza40UR3():
   vgp_device_missing="No hay ninguna pinza VGP conectada.<br>Programa detenido."
   mg_device_missing="No hay ninguna Magnetic Gripper conectada.<br>Programa detenido."
   fgp_device_missing="No hay ninguna pinza 2FGP20 conectada.<br>Programa detenido."
-  eyes_device_missing="No OnRobot Eyes connected.<br>Program halted."
+  eyes_device_missing="No hay ningún OnRobot Eyes conectado.<br>Programa detenido."
   on_xmlrpc_start_ip="Conexión al servidor XML-RPC de OnRobot:"
   on_java_comm_error_textmsg_title="OnRobot - Error de comunicación:"
   on_java_comm_controlsocket_open_error="Apertura de la toma 'javaSocket' incorrecta."
@@ -772,7 +778,10 @@ def pinza40UR3():
   else:
   local roundedMass=floor(mass/ON_LB2KG001+0.5)*ON_LB2KG001
   end 
-  set_payload(roundedMass,center_of_gravity)
+  
+  set_target_payload(roundedMass,center_of_gravity,inertia=[0,0,0,0,0,0],transition_time=on_transition_time)
+  on_transition_time=ON_DEFAULT_TRANSITION_TIME
+  
   on_mass_actual=roundedMass
   on_cog_actual=p[CoG[0],CoG[1],CoG[2],0.0,0.0,0.0]
   if ON_DEBUG_LOG:
@@ -934,6 +943,7 @@ def pinza40UR3():
   if(status_flag):
   popup(message,title=title,error=True,blocking=False)
   stop_var=True
+  textmsg(title+": ",message)
   end 
   return stop_var
   end 
@@ -981,9 +991,9 @@ def pinza40UR3():
   if(on_speedL==ON_ZERO6D):
   on_speedL=[on_speedL_last[0]/100,on_speedL_last[1]/100,on_speedL_last[2]/100,on_speedL_last[3]/100,on_speedL_last[4]/100,on_speedL_last[5]/100]
   end
-  speedl(on_speedL,a=on_speedl_acc,t=0.001)
+  speedl(on_speedL,a=on_speedl_acc,t=speedlTime)
   else:
-  speedl(ON_ZERO6D,a=on_speedl_acc_to_zero,t=0.001)
+  speedl(ON_ZERO6D,a=on_speedl_acc_to_zero,t=speedlTime)
   end 
   on_speedL_last=on_speedL
   end 
@@ -1079,7 +1089,7 @@ def pinza40UR3():
   rg_status_error_title="OnRobot - Error de estado RG"
   rg_status_error_missing="Problema de comunicación con una pinza RG. Compruebe el dispositivo.<br>Programa detenido."
   rg_else_error="Código de error desconocido:"
-  rg_status_msg_single="Estado de RG:"
+  rg_status_msg_single="Estado RG:"
   rg_data_error_bit0_single="Tamaño incorrecto de datos flotantes recibidos."
   rg_data_error_bit1_single="Tamaño incorrecto de datos enteros recibidos."
   rg_data_error_bit2_single="Tamaño incorrecto de datos booleanos recibidos."
@@ -1094,19 +1104,19 @@ def pinza40UR3():
   rg_data_error_bit1_primary="Tamaño incorrecto de datos enteros recibidos para RG primario."
   rg_data_error_bit2_primary="Tamaño incorrecto de datos booleanos recibidos para RG primario."
   rg_status_error_mismatch_primary="El estado RG primario no coincide con el estado de los interruptores de seguridad."
-  rg_status_error_s1_pushed_primary="El interruptor de seguridad S1 ha sido presionado en RG primario."
+  rg_status_error_s1_pushed_primary="El interruptor de seguridad S1 ha sido presionado en RG primaria."
   rg_status_error_s1_triggered_primary="El interruptor de seguridad S1 ha sido activado en RG primario.<br>Reinicie la pinza RG primaria."
-  rg_status_error_s2_pushed_primary="El interruptor de seguridad S2 ha sido presionado en RG primario."
+  rg_status_error_s2_pushed_primary="El interruptor de seguridad S2 ha sido presionado en RG primaria."
   rg_status_error_s2_triggered_primary="El interruptor de seguridad S2 ha sido activado en RG primario.<br>Reinicie la pinza RG primaria."
   rg_status_error_safety_system_primary="Se produjo un error del sistema de seguridad.<br>Reinicie la pinza RG primaria."
-  rg_status_msg_secondary="Estado secundario RG:"
-  rg_data_error_bit0_secondary="Tamaño incorrecto de datos flotantes recibidos para RG secundario."
-  rg_data_error_bit1_secondary="Tamaño incorrecto de datos enteros recibidos para RG secundario."
-  rg_data_error_bit2_secondary="Tamaño incorrecto de datos booleanos recibidos para RG secundario."
-  rg_status_error_mismatch_secondary="El estado RG secundario no coincide con el estado de los interruptores de seguridad."
-  rg_status_error_s1_pushed_secondary="El interruptor de seguridad S1 ha sido presionado en RG secundario."
+  rg_status_msg_secondary="Estado de RG secundaria:"
+  rg_data_error_bit0_secondary="Tamaño incorrecto de datos flotantes recibidos para RG secundaria."
+  rg_data_error_bit1_secondary="Tamaño incorrecto de datos enteros recibidos para RG secundaria."
+  rg_data_error_bit2_secondary="Tamaño incorrecto de datos booleanos recibidos para RG secundaria."
+  rg_status_error_mismatch_secondary="El estado RG secundaria no coincide con el estado de los interruptores de seguridad."
+  rg_status_error_s1_pushed_secondary="El interruptor de seguridad S1 ha sido presionado en RG secundaria."
   rg_status_error_s1_triggered_secondary="El interruptor de seguridad S1 ha sido activado en RG secundario.<br>Reinicie la pinza RG secundaria."
-  rg_status_error_s2_pushed_secondary="El interruptor de seguridad S2 ha sido presionado en RG secundario."
+  rg_status_error_s2_pushed_secondary="El interruptor de seguridad S2 ha sido presionado en RG secundaria."
   rg_status_error_s2_triggered_secondary="El interruptor de seguridad S2 ha sido activado en RG secundario.<br>Reinicie la pinza RG secundaria."
   rg_status_error_safety_system_secondary="Error del sistema de seguridad.<br>Reinicie la pinza RG secundaria."
   
@@ -1195,7 +1205,7 @@ def pinza40UR3():
   
   #======    End of OnRobot RG Engine    ======#
   rg_mounting_angle_arr[0] = 0.0
-  rg_fingertip_arr[0] = 4.599999904632568
+  rg_fingertip_arr[0] = 10.0
   rg_Depth_arr[0] = 5.0
   textmsg(on_devices_primary_log, ": Quick Changer + RG2 + [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]")
   on_follow_tcp = False
@@ -1350,7 +1360,7 @@ def pinza40UR3():
   #======    End of OnRobot RG Width    ======#
   #======    OnRobot VG Monitor Messages    ======#
   
-  rg_monitor_error_title="OnRobot - Agarre RG perdido"
+  rg_monitor_error_title="OnRobot - Pérdida de agarre de RG"
   rg_monitor_grip_lost_error="Se ha detectado la pérdida de agarre.<br>Programa detenido."
   
   #======    End of OnRobot VG Monitor Messages    ======#
@@ -1421,6 +1431,9 @@ def pinza40UR3():
   end 
   on_watchdog_thrd=run on_set_watchdog_thread()
   sync()
+  def done_waiting_for_init(device_name,product_code,tool_index=0):
+  textmsg(str_cat(device_name,str_cat(str_cat("[",tool_index),"]: ")),product_code)
+  end
   
   #======    End of OnRobot Run    ======#
   #======    OnRobot QC Start    ======#
@@ -1443,9 +1456,7 @@ def pinza40UR3():
   halt
   end 
   end 
-  if ON_DEBUG_LOG:
-  textmsg("Identified RG: ",rg_product_code_arr[tool_index])
-  end 
+  done_waiting_for_init("RG",rg_product_code_arr[tool_index],tool_index)
   end 
   rg_dataRead_running=True
   sync()
@@ -1468,13 +1479,36 @@ def pinza40UR3():
   
   #======    End of OnRobot RG Run    ======#
   # end: URCap Installation Node
-
-  # UNA SOLA AZIONE DI GRIP, SENZA while(True)
-  popup("TEST GRIP RG2", title="PC", warning=False)
-  on_return = rg_grip(43.5, 10.0, tool_index = 0, blocking = True, depth_comp = False, popupmsg = True)
-  rg_payload_set(mass = 0.0, tool_index = 0, use_guard = True)
+  step_count_3237e8a8_0b39_4bda_9fe0_0dfc34600755 = 0.0
+  thread Step_Counter_Thread_4c85fc30_ad3d_459c_8cd6_844045deca74():
+    while (True):
+      step_count_3237e8a8_0b39_4bda_9fe0_0dfc34600755 = step_count_3237e8a8_0b39_4bda_9fe0_0dfc34600755 + 1.0
+      sync()
+    end
+  end
+  run Step_Counter_Thread_4c85fc30_ad3d_459c_8cd6_844045deca74()
+  while (True):
+    $ 2 "Programa de robot"
+    $ 3 "Esperar: 2.0"
+    sleep(2.0)
+    # begin: URCap Program Node
+    #   Source: OnRobot, 6.5.0, OnRobot A/S
+    #   Type: Agarre RG
+    $ 4 "Agarre RG"
+on_return = rg_grip(10.0, 20.0, tool_index = 0, blocking = True, depth_comp = False, popupmsg = True)
+rg_payload_set(mass = 0.0, tool_index = 0, use_guard = True)
+    # end: URCap Program Node
+    $ 5 "Esperar: 2.0"
+    sleep(2.0)
+    # begin: URCap Program Node
+    #   Source: OnRobot, 6.5.0, OnRobot A/S
+    #   Type: Agarre RG
+    $ 6 "Agarre RG"
+on_return = rg_grip(30.0, 20.0, tool_index = 0, blocking = True, depth_comp = False, popupmsg = True)
+rg_payload_set(mass = 0.0, tool_index = 0, use_guard = True)
+    # end: URCap Program Node
+  end
 end
 
-
-
+gripper_test()
 

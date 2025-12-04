@@ -5,17 +5,9 @@ import socket
 from typing import List
 import os
 
-
 class Robot:
     """
     Controllo UR tramite socket TCP sulla porta 30002.
-    Invia comandi URScript come stringhe.
-
-    L'API è compatibile con la versione precedente basata su 'urx':
-    - move_joints()
-    - move_relative_z()
-    - move_to_pose()
-    - place_letter_in_slot()
     """
 
     def __init__(self, robot_ip: str, poses: dict, safety: dict, port: int = 30002):
@@ -27,9 +19,10 @@ class Robot:
         self.slots = self.poses.get("slots", {})
 
         self.safe_height = safety.get("safe_height", 0.25)
-        self.z_pick_offset = safety.get("z_pick_offset", -0.04)
+        # z_pick_offset: quanto scendere rispetto alla posa salvata (es. -0.05)
+        self.z_pick_offset = safety.get("z_pick_offset", -0.05) 
         self.max_speed = safety.get("max_speed", 0.1)
-        self.max_acc = safety.get("max_acc", 0.1)
+        self.max_acc = safety.get("max_acc", 0.2)
 
         self._simulated = False
         self.sock: socket.socket | None = None
@@ -50,8 +43,6 @@ class Robot:
             self._simulated = True
             self.sock = None
 
-    # ---------- GESTIONE CONNESSIONE ----------
-
     def close(self):
         if self.sock is not None and not self._simulated:
             try:
@@ -61,31 +52,20 @@ class Robot:
             print("🔌 Connessione socket chiusa.")
 
     def _send_urscript(self, script: str):
-        """
-        Invia una stringa URScript al robot.
-        Se in modalità simulata, stampa solo il comando.
-        """
         if self._simulated or self.sock is None:
             print(f"(SIM) URScript:\n{script.strip()}")
             return
-
         if not script.endswith("\n"):
             script += "\n"
-
         try:
             self.sock.sendall(script.encode("utf-8"))
         except OSError as e:
             print(f"⚠️ Errore nell'invio di URScript: {e}")
 
     def _send_script_file(self, filepath: str):
-        """
-        Invia un file URScript completo al robot (come facevi nel codice vecchio).
-        Il file viene letto in binario e mandato via socket così com'è.
-        """
         if self._simulated or self.sock is None:
             print(f"(SIM) Invierei il file URScript: {filepath}")
             return
-
         try:
             with open(filepath, "rb") as f:
                 data = f.read()
@@ -94,14 +74,9 @@ class Robot:
         except OSError as e:
             print(f"⚠️ Errore nel leggere o inviare {filepath}: {e}")
 
-
-    # ---------- MOVIMENTO DI BASE ----------
+    # ---------- MOVIMENTO BASE ----------
 
     def move_joints(self, joints: List[float]):
-        """
-        Movimento in spazio giunti con movej().
-        'joints' è una lista [q1, q2, q3, q4, q5, q6] in radianti.
-        """
         cmd = (
             f"movej([{joints[0]:.5f}, {joints[1]:.5f}, {joints[2]:.5f}, "
             f"{joints[3]:.5f}, {joints[4]:.5f}, {joints[5]:.5f}], "
@@ -109,111 +84,105 @@ class Robot:
         )
         print("➡️ move_joints:", joints)
         self._send_urscript(cmd)
-        # attesa grossolana per completare il movimento
         time.sleep(2.0)
 
-    def move_relative_z(self, dz: float):
-        """
-        Muove il TCP lungo Z in modo relativo usando movel().
-        """
-        script = (
-            "p = get_actual_tcp_pose()\n"
-            f"p[2] = p[2] + {dz:.5f}\n"
-            f"movel(p, a={self.max_acc}, v={self.max_speed})"
+    def move_linear(self, pose: List[float]):
+        """Movimento lineare verso una posa assoluta [x,y,z,rx,ry,rz]."""
+        cmd = (
+            f"movel(p[{pose[0]:.5f}, {pose[1]:.5f}, {pose[2]:.5f}, "
+            f"{pose[3]:.5f}, {pose[4]:.5f}, {pose[5]:.5f}], "
+            f"a={self.max_acc}, v={self.max_speed})"
         )
-        print(f"↕️ move_relative_z: {dz} m")
-        self._send_urscript(script)
-        time.sleep(1.0)
-
-    def move_to_pose(self, pose_name: str):
-        """
-        Usa una pose salvata in config.yaml sotto 'poses'.
-        Esempio: poses.home, poses.slots.'0', ecc.
-        """
-        if pose_name not in self.poses:
-            print(f"⚠️ Pose '{pose_name}' non trovata nel config.")
-            return
-        joints = self.poses[pose_name]
-        print(f"➡️  Vado alla pose '{pose_name}'")
-        self.move_joints(joints)
-
-    # ---------- PRENDERE / METTERE LETTERE ----------
-
-    def _go_to_letter_source(self, letter: str):
-        letter = letter.upper()
-        if letter not in self.letter_sources:
-            print(f"⚠️ Nessuna sorgente definita per la lettera '{letter}'")
-            return None
-        joints = self.letter_sources[letter]
-        print(f"➡️  Vado alla sorgente della lettera '{letter}'")
-        self.move_joints(joints)
-        return joints
-
-    def _go_to_slot(self, slot_index: int):
-        key = str(slot_index)
-        if key not in self.slots:
-            print(f"⚠️ Nessuna slot definita per indice '{slot_index}'")
-            return None
-        joints = self.slots[key]
-        print(f"➡️  Vado sopra la slot {slot_index}")
-        self.move_joints(joints)
-        return joints
+        print(f"➡️ move_linear verso: {pose}")
+        self._send_urscript(cmd)
+        time.sleep(2.5) 
 
     def grip(self, state: bool):
-        """
-        Comando reale per l'RG2/6 via URScript:
-        - state == False → APRI (usa script 'open')
-        - state == True  → CHIUDI (usa script 'close')
-        Gli script UR sono quelli generati da Polyscope (OnRobot URCap).
-        """
-        # Path relativi alla root del progetto
-        # Adatta se hai scelto nomi/cartelle diverse.
-        base_dir = "scripts"
-        open_script = "pinza_open.script"   # ex pinza40UR3.py
-        close_script = "pinza_close.script" # ex pinza10UR3.py
-
-        if not state:
-            print("🟢 Comando: APRI gripper")
-            filepath = os.path.join(base_dir, open_script)
-        else:
-            print("🔴 Comando: CHIUDI gripper")
-            filepath = os.path.join(base_dir, close_script)
-
+        """True -> CHIUDI, False -> APRI"""
+        # Assicurati che i file siano nella cartella corretta o usa percorso assoluto/relativo
+        script_apri = "src\pinza40UR3.py"
+        script_chiudi = "src\pinza10UR3.py"
+        
+        filepath = script_chiudi if state else script_apri
+        print(f"{'🔴 CHIUDI' if state else '🟢 APRI'} gripper ({filepath})")
         self._send_script_file(filepath)
-        # piccolo wait per dare tempo al controller di eseguire
-        time.sleep(1.0)
+        time.sleep(1.5)
 
+    # ---------- UTILS CALCOLO POSIZIONE ----------
 
+    def _get_down_pose(self, pose: List[float]) -> List[float]:
+        """
+        Prende una posa [x,y,z,rx,ry,rz] e restituisce una NUOVA posa
+        con la Z modificata sommando z_pick_offset.
+        Non interroga il robot, fa solo matematica pura.
+        """
+        # Creiamo una copia della lista per non modificare l'originale
+        down_pose = list(pose)
+        
+        # Modifichiamo la Z (indice 2)
+        # z_pick_offset nel config deve essere negativo (es. -0.05)
+        down_pose[2] = down_pose[2] + self.z_pick_offset
+        
+        return down_pose
+
+    # ---------- PICK & PLACE LOGIC ----------
 
     def place_letter_in_slot(self, letter: str, slot_index: int):
         """
-        Sequenza completa (logica, per ora senza gripper reale):
-        1. Vai sopra sorgente lettera
-        2. Scendi, prendi blocco (in futuro)
-        3. Torna su
-        4. Vai sopra slot
-        5. Scendi, lascia blocco (in futuro)
-        6. Torna su
+        Esegue Pick & Place calcolando le coordinate di discesa
+        basandosi ESCLUSIVAMENTE sui dati del config.yaml.
+        Nessuna chiamata a get_actual_tcp_pose().
         """
-
-        print(f"📦 Inizio sequenza per lettera '{letter}' nello slot {slot_index}")
-
-        # 1. Vai alla sorgente della lettera
-        if self._go_to_letter_source(letter) is None:
+        print(f"\n📦 INIZIO Pick&Place: Lettera '{letter}' -> Slot {slot_index}")
+        
+        # --- 0. RECUPERO COORDINATE DAL CONFIG ---
+        letter = letter.upper()
+        if letter not in self.letter_sources:
+            print(f"⚠️ Errore: Lettera {letter} non trovata nei source.")
+            return
+        
+        slot_key = str(slot_index)
+        if slot_key not in self.slots:
+            print(f"⚠️ Errore: Slot {slot_index} non trovato.")
             return
 
-        # Qui poi userai move_relative_z + grip(True)
-        # self.move_relative_z(self.z_pick_offset)
-        # self.grip(True)
-        # self.move_relative_z(-self.z_pick_offset)
+        # Posa ALTA della lettera (dal config)
+        source_pose_up = self.letter_sources[letter]
+        # Calcolo Posa BASSA della lettera (matematica Python)
+        source_pose_down = self._get_down_pose(source_pose_up)
 
-        # 3. Vai allo slot della parola
-        if self._go_to_slot(slot_index) is None:
-            return
+        # Posa ALTA dello slot (dal config)
+        slot_pose_up = self.slots[slot_key]
+        # Calcolo Posa BASSA dello slot (matematica Python)
+        slot_pose_down = self._get_down_pose(slot_pose_up)
 
-        # Qui poi userai move_relative_z + grip(False)
-        # self.move_relative_z(self.z_pick_offset)
-        # self.grip(False)
-        # self.move_relative_z(-self.z_pick_offset)
 
-        print("✅ Lettera (virtualmente) posizionata.")
+        # --- FASE 1: PICK (PRESA) ---
+        print("--- FASE PICK ---")
+        
+        self.grip(False)                    # 1. Apri
+        self.move_linear(source_pose_up)    # 2. Vai sopra la lettera (ALTO)
+        
+        print(f"   ⬇️ Scendo a Z={source_pose_down[2]:.4f}")
+        self.move_linear(source_pose_down)  # 3. Scendi alla posa calcolata (BASSO)
+        
+        self.grip(True)                     # 4. Chiudi (PRESA)
+        
+        print(f"   ⬆️ Risalgo a Z={source_pose_up[2]:.4f}")
+        self.move_linear(source_pose_up)    # 5. Torna su (ALTO)
+
+
+        # --- FASE 2: PLACE (DEPOSITO) ---
+        print("--- FASE PLACE ---")
+        
+        self.move_linear(slot_pose_up)      # 6. Vai sopra lo slot (ALTO)
+        
+        print(f"   ⬇️ Scendo a Z={slot_pose_down[2]:.4f}")
+        self.move_linear(slot_pose_down)    # 7. Scendi alla posa calcolata (BASSO)
+        
+        self.grip(False)                    # 8. Apri (RILASCIO)
+        
+        print(f"   ⬆️ Risalgo a Z={slot_pose_up[2]:.4f}")
+        self.move_linear(slot_pose_up)      # 9. Torna su (ALTO)
+
+        print("✅ Sequenza completata.\n")

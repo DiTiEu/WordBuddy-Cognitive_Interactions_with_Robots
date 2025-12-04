@@ -1,11 +1,11 @@
 # da fare
 
-robot_ip: "10.10.73.239"
+robot_ip: "10.10.73.237"
 camera_id: 0
 safety:
   max_speed: 0.2
   safe_height: 0.25
-  z_pick_offset: -0.01 
+  z_pick_offset: -0.039
 gripper:
   open_width_mm: 45     # apertura massima desiderata (mm)
 grid:
@@ -18,13 +18,13 @@ vision:
 difficulty: "normal"
 poses:
   letter_sources:
-    A: [-0.1216, -2.4925, -0.4095, -1.9348, 1.5364, 6.1450]
+    A: [0.275, -0.181, 0.047, 2.274, -2.17, 0.021]
     B: [0.20, -1.50, 1.80, 0.00, 1.60, 0.00]
     C: [0.30, -1.50, 1.80, 0.00, 1.60, 0.00]
     # ... aggiungi le altre lettere che ti servono
 
   slots:
-    "0": [0.40, -1.40, 1.90, 0.00, 1.60, 0.00]
+    "0": [0.385, -0.250, 0.047, 2.289, -2.167, 0.008]
     "1": [0.50, -1.40, 1.90, 0.00, 1.60, 0.00]
     "2": [0.60, -1.40, 1.90, 0.00, 1.60, 0.00]
     # ... fino al massimo numero di lettere della parola

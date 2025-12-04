@@ -1468,14 +1468,12 @@ def pinza10UR3():
   
   #======    End of OnRobot RG Run    ======#
   # end: URCap Installation Node
-  while (True):
-    $ 1 "Programa de robot"
-    # begin: URCap Program Node
-    #   Source: OnRobot, 5.17.1, OnRobot A/S
-    #   Type: Agarre RG
-    $ 2 "Agarre RG"
-on_return = rg_grip(10.0, 40.0, tool_index = 0, blocking = True, depth_comp = False, popupmsg = True)
-rg_payload_set(mass = 0.0, tool_index = 0, use_guard = True)
-    # end: URCap Program Node
-  end
+
+  # UNA SOLA AZIONE DI GRIP, SENZA while(True)
+  popup("TEST GRIP ", title="PC", warning=False)
+  on_return = rg_grip(15.0, 10.0, tool_index = 0, blocking = True, depth_comp = False, popupmsg = True)
+  rg_payload_set(mass = 0.0, tool_index = 0, use_guard = True)
 end
+
+
+
