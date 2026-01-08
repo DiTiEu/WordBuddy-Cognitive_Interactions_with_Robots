@@ -1471,7 +1471,7 @@ def pinza40UR3():
 
   # UNA SOLA AZIONE DI GRIP, SENZA while(True)
   popup("TEST GRIP RG2", title="PC", warning=False)
-  on_return = rg_grip(43.5, 10.0, tool_index = 0, blocking = True, depth_comp = False, popupmsg = True)
+  on_return = rg_grip(23, 10.0, tool_index = 0, blocking = True, depth_comp = False, popupmsg = True)
   rg_payload_set(mass = 0.0, tool_index = 0, use_guard = True)
 end
 

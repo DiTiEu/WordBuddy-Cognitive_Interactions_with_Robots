@@ -186,3 +186,96 @@ class Robot:
         self.move_linear(slot_pose_up)      # 9. Torna su (ALTO)
 
         print("✅ Sequenza completata.\n")
+
+    def get_calculated_letter_pose(self, letter: str):
+        """
+        HELPER: Calcola la posa di una lettera (A-T) basandosi su una griglia 4x5.
+        """
+        # --- CONFIGURAZIONE GRIGLIA LETTERE ---
+        # Coordinata esatta della lettera 'A' (da te fornita)
+        base_pose_A = [0.310, 0.097, 0.037, 0.007, 3.13, 0.006]
+        
+        col_spacing = 0.04  # 4 cm Orizzontale (Y)
+        row_spacing = 0.05  # 5 cm Verticale (X)
+        cols_per_row = 4    # 4 lettere per riga
+
+        letter = letter.upper()
+        index = ord(letter) - ord('A') # A=0, B=1...
+
+        # Controllo sicurezza (A-T)
+        if index < 0 or index > 19:
+            print(f"⚠️ Errore: Lettera '{letter}' fuori dalla griglia supportata (A-T).")
+            return None
+
+        # Calcolo riga e colonna
+        row_index = index // cols_per_row
+        col_index = index % cols_per_row
+
+        # Calcolo coordinate
+        target_pose = list(base_pose_A)
+        target_pose[0] += (row_index * row_spacing) # Offset X (Righe)
+        target_pose[1] += (col_index * col_spacing) # Offset Y (Colonne)
+        
+        return target_pose
+
+    def place_letter_in_calculated_slot(self, letter: str, slot_index: int):
+        """
+        Esegue Pick & Place COMPLETAMENTE CALCOLATO.
+        PICK: Calcolato su griglia 4x5 (tramite get_calculated_letter_pose).
+        PLACE: Calcolato su linea orizzontale (Slot 0 + offset).
+        """
+        print(f"\n🧮 INIZIO Pick&Place Full-Math: Lettera '{letter}' -> Slot {slot_index}")
+
+        # --- 0. CALCOLO POSA SLOT (DESTINAZIONE) ---
+        # Coordinata base dello Slot 0 [X, Y, Z, Rx, Ry, Rz]
+        slot_0_pose = [0.385, -0.250, 0.047, 0.007, 3.13, 0.006]
+        
+        # Calcolo Offset Slot (4 cm a destra per ogni indice)
+        y_offset_slot = 0.04 * slot_index 
+        
+        slot_pose_up = list(slot_0_pose)
+        slot_pose_up[1] = slot_0_pose[1] + y_offset_slot # Aggiungo offset a Y
+
+        slot_pose_down = self._get_down_pose(slot_pose_up)
+
+
+        # --- 1. CALCOLO POSA LETTERA (SORGENTE) ---
+        # Qui chiamiamo la nuova funzione invece di leggere self.letter_sources
+        source_pose_up = self.get_calculated_letter_pose(letter)
+
+        if source_pose_up is None:
+            return # Interrompe se la lettera non è valida
+
+        source_pose_down = self._get_down_pose(source_pose_up)
+
+
+        # --- 2. ESECUZIONE FISICA (Invariata) ---
+        
+        # --- FASE PICK ---
+        print(f"--- FASE PICK (Lettera {letter}) ---")
+        print(f"   📍 Coord Pick calcolate: X={source_pose_up[0]:.3f}, Y={source_pose_up[1]:.3f}")
+
+        self.grip(False)
+        self.move_linear(source_pose_up)    # Vai sopra la lettera
+        
+        print(f"   ⬇️ Scendo")
+        self.move_linear(source_pose_down)  # Scendi
+        self.grip(True)                     # Prendi
+        
+        print(f"   ⬆️ Risalgo")
+        self.move_linear(source_pose_up)    # Sali
+
+        # --- FASE PLACE ---
+        print(f"--- FASE PLACE (Slot {slot_index}) ---")
+        print(f"   📍 Coord Place calcolate: Y={slot_pose_up[1]:.3f}")
+        
+        self.move_linear(slot_pose_up)      # Vai sopra lo slot
+        
+        print(f"   ⬇️ Scendo")
+        self.move_linear(slot_pose_down)    # Scendi
+        self.grip(False)                    # Rilascia
+        
+        print(f"   ⬆️ Risalgo")
+        self.move_linear(slot_pose_up)      # Sali
+
+        print("✅ Sequenza completata.\n")

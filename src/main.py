@@ -91,8 +91,10 @@ def main():
     
     # Questa funzione esegue la sequenza: 
     # Vai su A -> Apri -> Scendi -> Chiudi -> Sali -> Vai su 0 -> Scendi -> Apri -> Sali
-    robot.place_letter_in_slot("A", 0)
-
+    # easy
+    # robot.place_letter_in_slot("A", 0)
+    for slot in range(5):
+        robot.place_letter_in_calculated_slot("C", slot)
     # Nota: Il ciclo del gioco reale è commentato qui sotto per riferimento futuro
     # for slot_index, letter in enumerate(robot_letters):
     #     robot.place_letter_in_slot(letter, slot_index)
