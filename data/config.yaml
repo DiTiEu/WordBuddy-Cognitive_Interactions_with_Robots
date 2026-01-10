@@ -1,12 +1,18 @@
-# da fare
+settings:
+  verbose: false  # Metti "true" se vuoi vedere coordinate e dettagli tecnici
 
-robot_ip: "10.10.73.237"
+robot:
+  ip: "10.10.73.237"  # Inserisci l'IP del tuo robot
+  port: 30002
+
 camera_id: 0
+
 safety:
-  max_speed: 0.2
-  max_acc: 0.2
-  safe_height: 0.25
-  z_pick_offset: -0.039
+  speed: 0.2
+  acc: 0.2
+  safe_height: 0.25    # Altezza di sicurezza durante gli spostamenti
+  z_pick_offset: -0.039 # Quanto scendere per prendere l'oggetto (rispetto alla posa UP)
+
 gripper:
   open_width_mm: 45     # apertura massima desiderata (mm)
 grid:
@@ -18,47 +24,26 @@ vision:
   ocr_threshold: 150
 difficulty: "normal"
 
-#Letter pick up, above Z offset
+#posizione home (coordinate joints0)
+home: [0.00087, -1.6877, -0.9894, 1.9697, 1.5591, 0.00767]
 
-poses:
-  letter_sources:
-    A: [0.275, -0.181, 0.047, 0.007, 3.13, 0.006]
-    B: [0.000000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    C: [0.000000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    D: [0.000000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    E: [0.000000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    F: [0.000000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    G: [0.000000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    H: [0.000000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    I: [0.000000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    J: [0.000000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    K: [0.000000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    L: [0.000000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    M: [0.000000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    N: [0.000000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    O: [0.000000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    P: [0.000000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    Q: [0.000000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    R: [0.000000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    S: [0.000000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    T: [0.000000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    U: [0.000000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    V: [0.000000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    W: [0.000000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    X: [0.000000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    Y: [0.000000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    Z: [0.000000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
+# Configurazione della Griglia delle Lettere (SORGENTE)
+grid:
+  # Posa esatta della lettera 'A' (Punto zero)
+  base_pose_A: [0.310, 0.097, 0.037, 0.007, 3.13, 0.006]
+  col_spacing: 0.05    # Distanza orizzontale (Y) tra lettere
+  row_spacing: 0.06    # Distanza verticale (X) tra righe
+  cols_per_row: 7      # Quante lettere ci sono in una riga
 
-  # Slots for the current word 
+# Configurazione degli Slot (DESTINAZIONE)
+slots:
+  # Posa esatta del primo cerchio (Slot 0)
+  base_pose_0: [0.385, -0.250, 0.047, 0.007, 3.13, 0.006]
   
-  slots:
-    "0": [0.385, -0.250, 0.047, 0.007, 3.13, 0.006]
-    "1": [0.050000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    "2": [0.100000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    "3": [0.150000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    "4": [0.200000, 0.000000, 0.250000, 0.000000, 3.141593, 0.000000]
-    # ... fino al massimo numero di lettere della parola
+  # Distanze per la diagonale. 
+  # Se fosse una linea dritta orizzontale, metti x_step: 0.0
+  x_step: 0.00         # Spostamento AVANTI/INDIETRO per ogni slot
+  y_step: 0.04         # Spostamento DESTRA/SINISTRA per ogni slot
 
-  home: [0.00087, -1.6877, -0.9894, 1.9697, 1.5591, 0.00767]
-  # CONVERTI  IN CARTES
   
+
