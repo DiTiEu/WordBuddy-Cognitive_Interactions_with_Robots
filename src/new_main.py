@@ -10,23 +10,21 @@ def mock_read_board(target_len):
     """
     SIMULAZIONE VISIONE:
     Invece di usare la telecamera, chiede all'utente cosa c'è sul tavolo.
-    Restituisce una stringa (es. "C A _ A").
     """
     print("\n👀 (Simulazione Camera) Il robot sta guardando il tavolo...")
     user_input = input(f"   [DEBUG] Scrivi le lettere che vedi sul tavolo (usa _ per vuoto): ").strip().upper()
-    # Pulisce l'input per avere solo lettere o _
+    
     detected_letters = [c if c.isalnum() else '_' for c in user_input.replace(" ", "")]
     
-    # Padding se l'utente ha scritto meno caratteri della lunghezza parola
+    # Padding
     while len(detected_letters) < target_len:
         detected_letters.append('_')
     
-    return detected_letters[:target_len] # Taglia se troppo lungo
+    return detected_letters[:target_len]
 
 def analyze_board(target_word, detected_letters):
     """
     Confronta la parola target con ciò che c'è sul tavolo.
-    Ritorna: status ('CORRECT', 'INCOMPLETE', 'WRONG'), dettagli
     """
     target_chars = list(target_word)
     
@@ -55,7 +53,7 @@ def main():
     words = load_words(os.path.join("data", "words.json"))
     
     robot = Robot(
-        robot_ip=config.get("robot_ip"),
+        robot_ip=config.get("robot", {}).get("ip"), 
         config=config
     )
 
@@ -92,6 +90,8 @@ def main():
         
         # --- GAME LOOP INTERNO (Tentativi Utente) ---
         game_active = True
+        detected = [] # Per tenere traccia dello stato del tavolo
+
         while game_active:
             print(f"\n⏳ Tocca a te! Completa la parola: {target_word.replace('', ' ').strip()}")
             input("👉 Premi INVIO quando hai posizionato le lettere...")
@@ -106,8 +106,7 @@ def main():
             # C. GESTIONE CASI
             if status == 'CORRECT':
                 print("\n🎉 COMPLIMENTI! La parola è corretta! 🎉")
-                # Feedback robot (opzionale: balletto o suono)
-                game_active = False # Esce dal loop interno
+                game_active = False 
                 
             elif status == 'INCOMPLETE':
                 print("\n⚠️  La parola non è completa.")
@@ -117,14 +116,15 @@ def main():
                     for i, char in enumerate(target_word):
                         if detected[i] == '_':
                             robot.place_letter_in_calculated_slot(char, i)
-                    game_active = False # Gioco finito (risolto dal robot)
+                    detected = list(target_word) # Aggiorniamo stato fittizio
+                    game_active = False 
                 else:
                     print("👍 Riprova, aspetto te.")
 
             elif status == 'WRONG':
                 print(f"\n❌ Ci sono {len(wrong_indices)} lettere sbagliate.")
                 print("1. Riprova da solo")
-                print("2. Dimmi quali sono sbagliate (il robot le toglie)")
+                print("2. Dimmi quali sono sbagliate (il robot le toglie e le rimette a posto)")
                 print("3. Arrenditi (il robot corregge tutto)")
                 
                 choice = input("Scelta (1/2/3): ")
@@ -135,19 +135,24 @@ def main():
                 elif choice == '2':
                     print("🦾 Il robot rimuove le lettere errate...")
                     for idx in wrong_indices:
-                        robot.remove_letter_from_slot(idx)
+                        # IMPORTANTE: Passiamo la lettera che c'è ora sul tavolo
+                        wrong_char = detected[idx]
+                        robot.remove_letter_from_slot(idx, wrong_char)
+                        detected[idx] = '_' # Aggiorniamo la visione
                     print("Ora riprova a mettere quelle giuste.")
                     
                 elif choice == '3':
                     print("🦾 Il robot corregge tutto...")
                     # 1. Toglie le sbagliate
                     for idx in wrong_indices:
-                        robot.remove_letter_from_slot(idx)
+                        wrong_char = detected[idx]
+                        robot.remove_letter_from_slot(idx, wrong_char)
                     # 2. Mette le giuste
                     for idx in wrong_indices:
                         letter_to_place = target_word[idx]
                         robot.place_letter_in_calculated_slot(letter_to_place, idx)
                     
+                    detected = list(target_word)
                     print(f"✅ La parola corretta era: {target_word}")
                     game_active = False
 
@@ -158,7 +163,9 @@ def main():
         # RESET TAVOLO
         reset_choice = input("Il robot deve svuotare il tavolo? (s/n): ").lower()
         if reset_choice == 's':
-            robot.clear_board(len(target_word))
+            # Se detected è vuoto (es. errore prima di iniziare), usa la target word parziale
+            letters_on_board = detected if len(detected) > 0 else list(target_word) 
+            robot.clear_board(letters_on_board)
         
         if choice != 's':
             print("👋 Grazie per aver giocato a WordBuddy!")
