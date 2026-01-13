@@ -22,8 +22,25 @@ grid:
   rows: 1
   cols: 5
 vision:
-  aruco_size_mm: 40
-  ocr_threshold: 150
+  aruco_dict: "DICT_4X4_50"
+  aruco_ids: [0, 1, 2, 3]
+
+  board_size_mm: [260, 200]   # [W_mm, H_mm]
+  px_per_mm: 4                # scala (4 px/mm = 1040x800)
+
+  slots_roi_px: []
+  occ_threshold: 18
+  use_bg_subtraction: true
+
+  # OCR
+  ocr_engine: "tesseract"     # "tesseract" oppure "none"
+  tesseract_psm: 10           # single character
+  whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  min_confidence: 30          # 0..100 (tesseract conf), se troppi "?"
+
+  rotate_topdown: "CW90" # "NONE", "CW90", "CCW90", "180"
+
+
 difficulty: "normal"
 
 #posizione home (coordinate joints0)
