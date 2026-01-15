@@ -1,0 +1,47 @@
+# --- AMBIENTI VIRTUALI ---
+.venv/
+venv/
+env/
+ENV/
+bin/
+lib/
+develop-eggs/
+dist/
+eggs/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# --- PYTHON CACHE ---
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+
+# --- VISIONE E DEBUG (Dati temporanei) ---
+# Escludiamo le foto scattate durante i test per non appesantire il repo
+data/test_images/
+data/test_logs/
+debug_fail.png
+topdown_NOCALIB.png
+
+# --- CONFIGURAZIONI PERSONALI ---
+# Se il tuo config.yaml contiene IP o dati sensibili, puoi ignorarlo
+# e caricare invece un "config.template.yaml"
+# data/config.yaml
+
+# --- SISTEMA OPERATIVO ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- IDE (VS Code, PyCharm) ---
+.vscode/
+.idea/
+*.swp
+*.swo

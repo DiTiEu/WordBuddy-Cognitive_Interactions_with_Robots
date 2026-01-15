@@ -4,7 +4,7 @@ settings:
 robot:
   ip: "10.10.73.237"  # Inserisci l'IP del tuo robot
   port: 30002
-  home_pose: [0.357, -0.140, 0.148git, 2.22, -2.22, 0.00]
+  home_pose: [0.357, -0.140, 0.148, 2.22, -2.22, 0.00]
 
 
 camera_id: 0
@@ -24,11 +24,23 @@ grid:
 vision:
   aruco_dict: "DICT_4X4_50"
   aruco_ids: [0, 1, 2, 3]
+  
+  classifier_model_path: "data/models/hog_svm.joblib"
+  classifier_min_conf: 0.45
+
 
   board_size_mm: [260, 200]   # [W_mm, H_mm]
   px_per_mm: 4                # scala (4 px/mm = 1040x800)
 
-  slots_roi_px: []
+
+
+  slots_roi_px:
+  - [63, 267, 168, 198]
+  - [252, 263, 157, 205]
+  - [428, 265, 170, 213]
+  - [623, 265, 166, 215]
+  - [801, 264, 160, 213]
+
   occ_threshold: 18
   use_bg_subtraction: true
 

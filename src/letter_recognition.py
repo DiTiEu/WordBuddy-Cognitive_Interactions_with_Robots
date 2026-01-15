@@ -1,7 +1,6 @@
 # src/letter_recognition.py
 # si occupa di: preprocess della patch di slot e OCR (Tesseract) → lettera
 
-from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Tuple, Optional
