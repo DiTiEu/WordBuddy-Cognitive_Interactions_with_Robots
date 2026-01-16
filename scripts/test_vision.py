@@ -1,7 +1,7 @@
-import os, sys, time, traceback
+# scripts/test_vision.py
+import os, sys, time, traceback, cv2
 import yaml
 
-# Aggiunge la root del progetto al path (come fai in calibrate_slots.py)
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, ROOT)
 
@@ -21,6 +21,9 @@ try:
     print("[4] Capturing frame...", flush=True)
     t0 = time.time()
     frame = vision.capture_frame()
+    os.makedirs("data/test_logs", exist_ok=True)
+    cv2.imwrite("data/test_logs/raw_frame.png", frame)
+    print("[4b] Saved data/test_logs/raw_frame.png", flush=True)
     print("[4] OK shape=", getattr(frame, "shape", None), "t=", round(time.time()-t0, 2), "s", flush=True)
 
     print("[5] Reading from frame...", flush=True)
@@ -30,7 +33,7 @@ try:
 
     print("Detected raw:", repr(out), flush=True)
     print("Detected spaced:", " ".join(list(out)), flush=True)
-    print("Debug image: data/test_logs/topdown_debug.png", flush=True)
+    print("Debug: data/test_logs/topdown_debug.png", flush=True)
 
 except Exception:
     print("\n[ERROR] Exception occurred:", flush=True)

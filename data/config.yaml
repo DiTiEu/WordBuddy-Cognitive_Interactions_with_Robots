@@ -6,6 +6,8 @@ robot:
   port: 30002
   home_pose: [0.357, -0.140, 0.148, 2.22, -2.22, 0.00]
 
+  home_joints: [0.0017, -1.5259, -1.3523, -1.7195, 1.5724, 0.0059]
+
 
 camera_id: 0
 
@@ -24,9 +26,9 @@ grid:
 vision:
   aruco_dict: "DICT_4X4_50"
   aruco_ids: [0, 1, 2, 3]
-  
-  classifier_model_path: "data/models/hog_svm.joblib"
-  classifier_min_conf: 0.45
+
+  classifier_model_path: "data/models/cnn_savedmodel"
+  classifier_min_conf: 0.30
 
 
   board_size_mm: [260, 200]   # [W_mm, H_mm]
@@ -34,12 +36,18 @@ vision:
 
 
 
-  slots_roi_px:
-  - [63, 267, 168, 198]
-  - [252, 263, 157, 205]
-  - [428, 265, 170, 213]
-  - [623, 265, 166, 215]
-  - [801, 264, 160, 213]
+  slots_roi_px: 
+    - [33, 294, 183, 163]
+    - [227, 292, 175, 164]
+    - [420, 289, 166, 169]
+    - [614, 287, 155, 173]
+    - [813, 288, 138, 172]
+
+  #  - [63, 267, 168, 198]
+  # - [252, 263, 157, 205]
+  # - [428, 265, 170, 213]
+  # - [623, 265, 166, 215]
+  # - [801, 264, 160, 213]
 
   occ_threshold: 18
   use_bg_subtraction: true
@@ -62,31 +70,31 @@ difficulty: "normal"
 grids:
   - name: "Zona Sinistra (Facile)"
     range: "A-I"        # Da quale lettera a quale lettera
-    base_pose: [0.218, -0.419, 0.037, 0.007, 3.13, 0.006] # Posa della PRIMA lettera (es. A)
+    base_pose: [0.16, -0.414, 0.037, 0.007, 3.13, 0.006] # Posa della PRIMA lettera (es. A)
     cols: 3             # Numero di colonne per questa griglia
     spacing:            # Distanze per questa specifica griglia
-      y: 0.04           # Orizzontale (cm)
-      x: 0.05           # Verticale (cm)
+      y: 0.048        # Orizzontale (cm)
+      x: 0.058           # Verticale (cm)
 
   - name: "Zona C (Lontana)"
     range: "J-Q"        # Da H a P
-    base_pose: [0.223, -0.179, 0.047, 0.007, 3.13, 0.006] # Posa della prima lettera del gruppo (es. H)
+    base_pose: [0.216, -0.1755, 0.047, 0.007, 3.13, 0.006] # Posa della prima lettera del gruppo (es. H)
     cols: 4             # Magari qui vuoi farla stretta e lunga
     spacing:
-      y: 0.04
-      x: 0.05
+      y: 0.038
+      x: 0.058
 
   - name: "Zona R (Resto)"
     range: "R-Z"        # Le ultime lettere
-    base_pose: [0.245, 0.093, 0.037, 0.007, 3.13, 0.006] # Posa della Q
+    base_pose: [0.25, 0.08973, 0.037, 0.007, 3.13, 0.006] # Posa della Q
     cols: 3
     spacing:
-      y: 0.04
-      x: 0.05
+      y: 0.048
+      x: 0.058
 
 slots:
   # Posa esatta del primo cerchio (Slot 0)
-  base_pose_0: [0.39388, -0.24203, 0.047, 0.007, 3.13, 0.006]
+  base_pose_0: [0.4, -0.2419, 0.047, 0.007, 3.13, 0.006]
   
   # Distanze per la diagonale. 
   # Se fosse una linea dritta orizzontale, metti x_step: 0.0

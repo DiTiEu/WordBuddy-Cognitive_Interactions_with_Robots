@@ -12,7 +12,7 @@ from typing import List, Tuple, Optional, Dict, Any
 import cv2
 import numpy as np
 
-from src.slot_classifier_hog_svm import SlotClassifierHOGSVM, HOGSVMConfig
+from src.cnn_classifier import SlotClassifierCNN, CNNConfig
 
 
 # ----------------------------
@@ -57,9 +57,10 @@ class VisionConfig:
     warp: WarpConfig
     slots_roi_px: List[Tuple[int, int, int, int]]  # 5 ROI (x,y,w,h)
 
-    # Classifier (HOG+SVM)
-    classifier_model_path: str = "data/models/hog_svm.joblib"
-    classifier_min_conf: float = 0.55
+    # Classifier CNN
+    classifier_model_path: str = "data/models/cnn_savedmodel"
+    classifier_min_conf: float = 0.40
+
 
     # I/O dirs
     calibration_dir: str = "data/calibration"
@@ -256,12 +257,11 @@ class BoardVision:
         self.cfg = cfg
         self.warper = BoardWarper(cfg.warp)
 
-        self.classifier = SlotClassifierHOGSVM(
-            HOGSVMConfig(
-                model_path=cfg.classifier_model_path,
-                input_size=96,
-                use_circular_mask=False,          # <-- NO radius
-                mask_radius_frac=0.42,            # ignorato se mask False
+        self.classifier = SlotClassifierCNN(
+            CNNConfig(
+                model_dir=cfg.classifier_model_path,
+                input_size=64,
+                grayscale=True,
                 min_confidence=cfg.classifier_min_conf,
                 return_unknown_as_empty=True,
                 use_empty_heuristic=True,
@@ -270,6 +270,7 @@ class BoardVision:
                 verbose_load=False,
             )
         )
+
 
 
 
@@ -300,7 +301,22 @@ class BoardVision:
         if len(self.cfg.slots_roi_px) != 5:
             raise RuntimeError("slots_roi_px not set. Run calibration first.")
 
-        topdown, dbg = self.warper.warp(frame_bgr)
+        topdown = None
+        dbg = None
+        last_err = None
+
+        for attempt in range(10):
+            try:
+                topdown, dbg = self.warper.warp(frame_bgr)
+                break
+            except Exception as e:
+                last_err = e
+                # ricattura un frame (aiuta molto)
+                frame_bgr = self.capture_frame()
+
+        if topdown is None:
+            raise RuntimeError("Warp failed after retries: {}".format(last_err))
+
         slots = self._extract_slots(topdown)
 
         chars: List[str] = []
@@ -371,8 +387,8 @@ def build_board_vision_from_config_dict(cfg: dict) -> BoardVision:
         camera_id=int(cfg.get("camera_id", v.get("camera_id", 0))),
         warp=warp,
         slots_roi_px=slots_roi_px,
-        classifier_model_path=str(v.get("classifier_model_path", "data/models/hog_svm.joblib")),
-        classifier_min_conf=float(v.get("classifier_min_conf", 0.55)),
+        classifier_model_path=str(v.get("classifier_model_path", "data/models/cnn_savedmodel")),
+        classifier_min_conf=float(v.get("classifier_min_conf", 0.40)),
         calibration_dir="data/calibration",
         logs_dir="data/test_logs",
     )
