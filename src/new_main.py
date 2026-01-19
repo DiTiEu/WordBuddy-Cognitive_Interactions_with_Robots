@@ -2,196 +2,133 @@ import os
 import time
 import yaml
 import sys
+import csv
+import pyttsx3
+from datetime import datetime
 
-# Aggiungiamo la root del progetto al path per sicurezza
 sys.path.append(os.getcwd())
 
-from utils import load_config, load_words
-from game_logic import select_word, split_letters
-from new_robot_control import Robot 
-
-# Importiamo la factory che legge la config e crea la visione CNN
+from src.utils import load_config, load_words
+from src.game_logic import select_word, split_letters, create_word_with_error
+from src.new_robot_control import Robot 
 from src.board_vision import build_board_vision_from_config_dict
 
+# TTS Init (Compatible with pyttsx3 2.71)
+engine = pyttsx3.init()
+engine.setProperty('rate', 145)
+engine.setProperty('volume', 1.0)
 
-# --- FUNZIONI VISIONE ---
+def speak(text):
+    print(f"🔊 Robot: {text}")
+    engine.say(text)
+    engine.runAndWait()
 
-def mock_read_board(target_len):
-    """Fallback manuale se la camera non va"""
-    print("\n👀 [MOCK] Visione simulata.")
-    user_input = input("   Inserisci lettere sul tavolo (es. 'C _ R S O'): ").strip().upper()
-    detected_letters = [c if c.isalnum() else '_' for c in user_input.replace(" ", "")]
-    # Padding se troppo corta
-    while len(detected_letters) < target_len:
-        detected_letters.append('_')
-    return detected_letters[:target_len]
+def log_session_metrics(mode, target_word, cycle_time, status):
+    log_file = "data/robot_performance_metrics.csv"
+    headers = ["timestamp", "game_mode", "target_word", "cycle_time_sec", "result"]
+    file_exists = os.path.isfile(log_file)
+    with open(log_file, "a", newline="") as f:
+        writer = csv.writer(f)
+        if not file_exists: writer.writerow(headers)
+        writer.writerow([datetime.now(), mode, target_word, round(cycle_time, 2), status])
 
-
-def read_board_real(vision, target_len, save_debug=True):
-    """
-    Usa la BoardVision (che dentro ha la CNN) per leggere le lettere.
-    """
-    if target_len > 5:
-        print(f"⚠️ Attenzione: Parola lunga {target_len}, ma la board ha max 5 slot.")
-
-    # 1. Cattura frame
+def read_board_real(vision, target_len):
     frame = vision.capture_frame()
-    
-    # 2. Elaborazione (Warp -> Crop -> CNN Predict)
-    # Ritorna una stringa di 5 caratteri (es "C RSO")
-    detected_str = vision.read_from_frame(frame, save_debug=save_debug) 
-    
-    # 3. Conversione in lista
+    detected_str = vision.read_from_frame(frame, save_debug=True) 
     detected = [('_' if c == ' ' else c) for c in detected_str]
-    
     return detected[:target_len]
 
-
 def analyze_board(target_word, detected_letters):
-    """Logica di confronto standard"""
-    target_chars = list(target_word)
-
-    if '_' in detected_letters:
-        return 'INCOMPLETE', []
-
-    wrong_indices = []
-    for i, (t, d) in enumerate(zip(target_chars, detected_letters)):
-        if t != d:
-            wrong_indices.append(i)
-
-    if wrong_indices:
-        return 'WRONG', wrong_indices
-
-    return 'CORRECT', []
-
-
-# --- MAIN ---
+    target_chars = list(target_word.upper())
+    if '_' in detected_letters: return 'INCOMPLETE', []
+    wrong_indices = [i for i, (t, d) in enumerate(zip(target_chars, detected_letters)) if t != d]
+    return ('CORRECT' if not wrong_indices else 'WRONG'), wrong_indices
 
 def main():
-    print("\n🤖 --- WORDBUDDY (CNN VERSION) --- 🤖\n")
+    print("\n🤖 --- WORDBUDDY ENGLISH LEARNING SYSTEM --- 🤖\n")
 
-    # 1. CARICAMENTO CONFIG
     config_path = os.path.join("data", "config.yaml")
     config = load_config(config_path)
-    words = load_words(os.path.join("data", "words.json"))
+    words_data = load_words(os.path.join("data", "words.json"))
+    robot = Robot(robot_ip=config.get("robot", {}).get("ip"), config=config)
 
-    # 2. INIT ROBOT
-    robot = Robot(
-        robot_ip=config.get("robot", {}).get("ip"),
-        config=config
-    )
-
-    # 3. INIT VISIONE (CNN)
     try:
-        # Rileggiamo il yaml raw per passarlo al builder
         with open(config_path, "r", encoding="utf-8") as f:
             vision_cfg = yaml.safe_load(f)
-        
         vision = build_board_vision_from_config_dict(vision_cfg)
         use_camera = True
-        print("📷 Sistema di Visione CNN caricato correttamente.")
+        print("📷 Vision System: ONLINE")
     except Exception as e:
-        print(f"⚠️ Errore caricamento Visione: {e}")
-        print("   Si userà la modalità MOCK (manuale).")
-        vision = None
+        print(f"⚠️ Vision System: OFFLINE ({e})")
         use_camera = False
 
     while True:
-        print("\n" + "=" * 40)
-        print("🆕 NUOVO ROUND")
-        print("=" * 40)
-
-        # Scelta difficoltà
-        while True:
-            diff = input("🎚️  Difficoltà (easy/normal/hard): ").lower().strip()
-            if diff in ["easy", "normal", "hard"]: break
-
-        # Scelta Parola (max 5 lettere)
-        target_word = None
-        for _ in range(100):
-            w = select_word(words)
-            if w and len(w) <= 5:
-                target_word = w
-                break
+        print("\n" + "="*45 + "\nMAIN MENU - SELECT GAME MODE\n" + "="*45)
+        print("1: SPELLING BEE   (Listen & write from scratch)")
+        print("2: RIDDLE MASTER  (Hint & incomplete word)")
+        print("3: ERROR HUNTER   (Find and fix robot's typo)")
+        print("Q: QUIT SESSION")
         
-        if not target_word:
-            print("❌ Errore: nessuna parola valida trovata.")
-            break
+        mode_choice = input("\nEnter choice (1/2/3/Q): ").strip().upper()
+        if mode_choice == 'Q': break
+        if mode_choice not in ['1', '2', '3']: continue
 
-        robot_letters, user_letters = split_letters(target_word, diff)
+        try:
+            word_obj = select_word(words_data)
+            target = word_obj['word'].upper()
+            hint = word_obj['hint']
+        except Exception as e:
+            print(f"❌ Selection error: {e}"); break
 
-        print(f"\n🎯 Parola Target: {target_word}")
-        print(f"🤖 Robot mette: {robot_letters}")
-        print(f"👤 Tu metti:    {user_letters}")
+        start_time = time.time()
+        game_status = "PENDING"
 
-        # Robot agisce
-        print("\n🦾 Il robot posiziona le sue lettere...")
-        for i, letter in enumerate(robot_letters):
-            if letter != '_':
-                robot.place_letter_in_calculated_slot(letter, i)
+        if mode_choice == '1':
+            speak(f"Listen to the word: {target}. Can you spell it for me?")
+        elif mode_choice == '2':
+            speak("Here is your hint."); speak(hint)
+            diff = input("Select difficulty (easy/normal/hard): ").lower()
+            display_str = split_letters(target, diff)
+            print(f"Robot placement guide: {display_str}")
+            for i, char in enumerate(display_str):
+                if char != '_': robot.place_letter_in_calculated_slot(char, i)
+        elif mode_choice == '3':
+            wrong_word, _ = create_word_with_error(target)
+            speak("I will place a word with one mistake. Find it and fix it!")
+            for i, char in enumerate(wrong_word):
+                robot.place_letter_in_calculated_slot(char, i)
 
-        # Loop di gioco
         game_active = True
-        detected = []
-
         while game_active:
-            print(f"\n⏳ Completa la parola: {target_word}")
-            input("👉 Premi INVIO per analizzare il tavolo...")
-
-            # LETTURA TAVOLO
+            input("\n👉 Press ENTER once you have placed the letters...")
             if use_camera:
                 try:
-                    detected = read_board_real(vision, len(target_word), save_debug=True)
-                except Exception as e:
-                    print(f"⚠️ Errore Visione: {e}")
-                    detected = mock_read_board(len(target_word))
+                    detected = read_board_real(vision, len(target))
+                    print(f"🔍 System detected: {' '.join(detected)}")
+                    status, wrongs = analyze_board(target, detected)
+                    
+                    if status == 'CORRECT':
+                        speak("Excellent! You found the right word.")
+                        game_status = "SUCCESS"; game_active = False
+                    elif status == 'INCOMPLETE':
+                        speak("The word is not finished. Keep going!")
+                    else:
+                        speak(f"I see {len(wrongs)} mistakes. Take another look.")
+                        if input("Need help? Robot can remove errors (y/n): ").lower() == 'y':
+                            for idx in wrongs: robot.remove_letter_from_slot(idx, detected[idx])
+                except Exception as e: print(f"⚠️ Vision Error: {e}")
             else:
-                detected = mock_read_board(len(target_word))
+                print(f"DEBUG: Target word was {target}"); game_status = "SUCCESS_MOCK"; game_active = False
 
-            print(f"🔍 Il robot vede: {' '.join(detected)}")
+        cycle_time = time.time() - start_time
+        log_session_metrics(mode_choice, target, cycle_time, game_status)
+        print(f"⏱️ Round completed in {cycle_time:.1f} seconds.")
 
-            # ANALISI
-            status, wrong_indices = analyze_board(target_word, detected)
+        if input("\nPlay again? (y/n): ").lower() != 'y': break
+        if input("Clear the board? (y/n): ").lower() == 'y': robot.clear_board(list(target))
 
-            if status == 'CORRECT':
-                print("\n🎉 BRAVO! Parola corretta! 🎉")
-                game_active = False
-
-            elif status == 'INCOMPLETE':
-                print("\n⚠️  Parola incompleta.")
-                print("   Completa gli spazi vuoti e riprova.")
-
-            elif status == 'WRONG':
-                print(f"\n❌ Ci sono {len(wrong_indices)} lettere sbagliate.")
-                print("1. Riprova tu")
-                print("2. Aiuto Robot (Rimuove errate)")
-                print("3. Resa (Robot corregge tutto)")
-                
-                choice = input("Scelta: ")
-                
-                if choice == '2':
-                    print("🦾 Rimuovo lettere errate...")
-                    for idx in wrong_indices:
-                        if detected[idx] != '_':
-                            robot.remove_letter_from_slot(idx, detected[idx])
-                elif choice == '3':
-                    print("🦾 Correggo tutto...")
-                    # Rimuovi errate
-                    for idx in wrong_indices:
-                        if detected[idx] != '_':
-                            robot.remove_letter_from_slot(idx, detected[idx])
-                    # Metti giuste
-                    for idx in wrong_indices:
-                        robot.place_letter_in_calculated_slot(target_word[idx], idx)
-                    game_active = False
-
-        # Fine partita
-        if input("\nVuoi giocare ancora? (s/n): ").lower() != 's':
-            robot.close()
-            break
-        else:
-            if input("Svuotare il tavolo? (s/n): ").lower() == 's':
-                robot.clear_board(list(target_word))
+    robot.close()
+    speak("Goodbye!")
 
 if __name__ == "__main__":
     main()

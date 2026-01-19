@@ -1,9 +1,9 @@
 [
-  "GATTO",
-  "LUNA",
-  "SOLE",
-  "CANE",
-  "PESCE",
-  "CASA",
-  "PIANO"
+  {"word": "SUN", "hint": "It shines during the day"},
+  {"word": "DOG", "hint": "A pet that barks"},
+  {"word": "CAT", "hint": "A pet that meows"},
+  {"word": "FISH", "hint": "It swims in water"},
+  {"word": "BIRD", "hint": "It has wings and flies"},
+  {"word": "PLANE", "hint": "It carries people through the sky"},
+  {"word": "HOUSE", "hint": "A building where people live"}
 ]
