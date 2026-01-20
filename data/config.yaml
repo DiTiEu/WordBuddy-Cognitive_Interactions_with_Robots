@@ -70,7 +70,7 @@ difficulty: "normal"
 grids:
   - name: "Zona Sinistra (Facile)"
     range: "A-I"        # Da quale lettera a quale lettera
-    base_pose: [0.16, -0.414, 0.037, 0.007, 3.13, 0.006] # Posa della PRIMA lettera (es. A)
+    base_pose: [0.165, -0.41720, 0.037, 0.007, 3.13, 0.006] # Posa della PRIMA lettera (es. A)
     cols: 3             # Numero di colonne per questa griglia
     spacing:            # Distanze per questa specifica griglia
       y: 0.048        # Orizzontale (cm)

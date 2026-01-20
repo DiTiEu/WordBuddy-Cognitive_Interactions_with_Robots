@@ -3,7 +3,14 @@
   {"word": "DOG", "hint": "A pet that barks"},
   {"word": "CAT", "hint": "A pet that meows"},
   {"word": "FISH", "hint": "It swims in water"},
-  {"word": "BIRD", "hint": "It has wings and flies"},
-  {"word": "PLANE", "hint": "It carries people through the sky"},
-  {"word": "HOUSE", "hint": "A building where people live"}
+  {"word": "MILK", "hint": "A white drink from cows"},
+  {"word": "FROG", "hint": "A green animal that jumps"},
+  {"word": "TRAIN", "hint": "It travels on tracks and goes choo-choo"},
+  {"word": "LION", "hint": "A large wild cat known as the king"},
+  {"word": "CAKE", "hint": "A sweet dessert for birthdays"},
+  {"word": "FORK", "hint": "You use it to eat pasta or meat"},
+  {"word": "SNAKE", "hint": "A long reptile with no legs"},
+  {"word": "GLOVE", "hint": "You wear it to keep your hand warm"},
+  {"word": "TRUCK", "hint": "A large vehicle used to carry heavy things"},
+  {"word": "MOUSE", "hint": "A tiny animal that loves cheese"}
 ]
