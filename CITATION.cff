@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: "If you use this work in your research, please cite it using the metadata below."
+type: software
+title: "WordBuddy: Cognitive Interactions with Robots for Educational Purposes"
+abstract: >
+  WordBuddy is an interactive educational robotic system that helps children
+  improve English word recognition and spelling through physical interaction
+  with letter blocks. The system integrates a UR3 collaborative robot arm,
+  a CNN-based computer vision pipeline for letter recognition, and an adaptive
+  game logic engine with three game modes (Spelling Bee, Fill the Gap, Find the
+  Error). It uses text-to-speech feedback to create an engaging human-robot
+  interaction learning environment.
+authors:
+  - given-names: Diego
+    family-names: Terzi
+    email: terzi.diego02@gmail.com
+repository-code: "https://github.com/diego-terzi/WordBuddy-Cognitive_Interactions_with_Robots"
+license: MIT
+date-released: "2026-01-21"
+version: "1.0.0"
+keywords:
+  - robotics
+  - educational robotics
+  - human-robot interaction
+  - computer vision
+  - convolutional neural network
+  - text-to-speech
+  - UR3
+  - cognitive robotics
+  - spelling game
+  - children education
